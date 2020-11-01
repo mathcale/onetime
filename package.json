@@ -1,0 +1,21 @@
+{
+  "name": "onetime",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^10.0.0",
+    "next-auth": "^3.1.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  },
+  "devDependencies": {
+    "@types/next-auth": "^3.1.14",
+    "typescript": "^4.0.5"
+  }
+}
