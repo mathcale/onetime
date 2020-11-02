@@ -10,6 +10,26 @@ export const AccountService = {
 
     return data;
   },
+  saveAccount: async (
+    userId: string,
+    account: string,
+    secret: string
+  ): Promise<Account | never> => {
+    const response = await fetch(`/api/accounts/${userId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        account,
+        secret,
+      }),
+    });
+
+    const data = await response.json();
+
+    return data;
+  },
   isTokenValid: (token: string, secret: string): boolean => {
     return authenticator.check(token, secret);
   },

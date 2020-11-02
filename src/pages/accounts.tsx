@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
+import Link from 'next/link';
 import { getSession, Session } from 'next-auth/client';
 import { authenticator } from '@otplib/preset-v11';
 
@@ -62,6 +63,8 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
   return (
     <div>
       <h1>Accounts</h1>
+      <Link href="/accounts/create">Add</Link>
+
       {isLoading ? (
         <p>Loading...</p>
       ) : (

@@ -1,9 +1,22 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/client';
 
+import type { CreateAccountRequest, Account } from '../../../types';
 import { connectToDatabase } from '../../../utils/mongodb';
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const isRequestBodyValid = (body: CreateAccountRequest): boolean => {
+  if (body?.account === '') {
+    return false;
+  }
+
+  if (body?.secret === '') {
+    return false;
+  }
+
+  return true;
+};
+
+export default async (req: NextApiRequest, res: NextApiResponse): Promise<void | never> => {
   const session = await getSession({ req });
 
   if (!session) {
@@ -21,7 +34,28 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   const { db } = await connectToDatabase();
 
-  const accounts = await db.collection('keys').find({ userId: id }).toArray();
+  if (req.method === 'GET') {
+    const accounts = await db.collection('keys').find({ userId: id }).toArray();
 
-  res.status(200).json(accounts);
+    res.status(200).json(accounts);
+  } else if (req.method === 'POST') {
+    const body: CreateAccountRequest = req.body;
+
+    if (!isRequestBodyValid(body)) {
+      res.status(422).json({ message: 'Invalid request body!' });
+      return;
+    }
+
+    const newAccount = {
+      userId: id,
+      account: body.account,
+      secret: body.secret,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } as Account;
+
+    const result = await db.collection('keys').insertOne(newAccount);
+
+    res.status(201).json(result.ops[0]);
+  }
 };
