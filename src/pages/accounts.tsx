@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getSession, Session } from 'next-auth/client';
 import { authenticator } from '@otplib/preset-v11';
 
+import { Navbar, AccountCard } from '../components';
 import { AccountService } from '../services';
 import { Account } from '../types';
 
@@ -56,34 +57,39 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
     return () => clearInterval(interval);
   }, []);
 
-  const copy = async (token: string): Promise<void> => {
-    await navigator.clipboard.writeText(token);
-  };
-
   return (
-    <div>
-      <h1>Accounts</h1>
-      <Link href="/accounts/create">Add</Link>
+    <>
+      <Navbar />
 
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <div>
-          {accounts.map(account => (
-            <div key={account._id}>
-              <h3>{account.account}</h3>
-              <p>{account.token}</p>
+      <div className="p-5">
+        <h1 className="text-3xl font-bold">Accounts</h1>
+        <Link href="/accounts/create" passHref>
+          <a className="border border-indigo-500 bg-indigo-500 text-white rounded-md px-4 py-2 m-2 transition duration-500 ease select-none hover:bg-indigo-600 focus:outline-none focus:shadow-outline">
+            Add
+          </a>
+        </Link>
 
-              <button type="button" onClick={() => copy(account.token)}>
-                Copy
-              </button>
-
-              <button type="button">Delete</button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : (
+          <div className="py-5">
+            <main className="h-full overflow-y-auto">
+              <div className="container mx-auto grid">
+                <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-5">
+                  {accounts.map(account => (
+                    <AccountCard
+                      key={account._id}
+                      accountName={account.account}
+                      token={account.token}
+                    />
+                  ))}
+                </div>
+              </div>
+            </main>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
