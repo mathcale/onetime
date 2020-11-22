@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app';
 import { Provider } from 'next-auth/client';
 
+import 'notyf/notyf.min.css';
 import '../assets/css/styles.css';
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
