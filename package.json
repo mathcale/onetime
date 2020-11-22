@@ -1,8 +1,13 @@
 {
   "name": "onetime",
-  "version": "1.0.0",
-  "main": "index.js",
+  "description": "Yet another time-based one-time password (TOTP) manager",
+  "version": "2.0.1",
   "license": "MIT",
+  "author": {
+    "name": "Matheus Calegaro",
+    "email": "hello@matheus.me",
+    "url": "https://matheus.me"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
