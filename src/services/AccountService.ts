@@ -5,6 +5,7 @@ import type { Account } from '../types';
 
 export const AccountService = {
   getAccounts: async (session: Session): Promise<Account[]> => {
+    // @ts-ignore
     const response = await fetch(`/api/accounts/${session.user.id}`);
     const data = await response.json();
 
