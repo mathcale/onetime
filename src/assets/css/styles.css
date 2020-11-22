@@ -21,3 +21,6 @@ body {
 /* Stop purging. */
 
 /* Your own custom utilities */
+#menu-toggle:checked + #menu {
+  display: block;
+}
