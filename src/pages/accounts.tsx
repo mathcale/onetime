@@ -112,7 +112,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
   if (!session && context.req) {
     context.res.writeHead(302, { Location: NEXT_PUBLIC_BASE_URL }).end();
-    return null;
+    return { props: {} };
   }
 
   return {
