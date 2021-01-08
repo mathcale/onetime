@@ -8,6 +8,9 @@
     "email": "hello@matheus.me",
     "url": "https://matheus.me"
   },
+  "engines": {
+    "node": "12"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
