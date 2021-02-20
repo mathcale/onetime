@@ -12,6 +12,8 @@ interface AccountsPageProps {
   session: Session;
 }
 
+const { NEXT_PUBLIC_BASE_URL } = process.env;
+
 const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +29,7 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
 
         setAccounts(_accounts);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       } finally {
         setIsLoading(false);
       }
@@ -57,17 +59,29 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
     return () => clearInterval(interval);
   }, []);
 
+  if (!session && typeof window !== 'undefined') {
+    window.location.href = NEXT_PUBLIC_BASE_URL;
+    return null;
+  }
+
   return (
     <>
       <Navbar />
 
       <div className="p-5">
-        <h1 className="text-3xl font-bold">Accounts</h1>
-        <Link href="/accounts/create" passHref>
-          <a className="border border-indigo-500 bg-indigo-500 text-white rounded-md px-4 py-2 m-2 transition duration-500 ease select-none hover:bg-indigo-600 focus:outline-none focus:shadow-outline">
-            Add
-          </a>
-        </Link>
+        <div className="py-5">
+          <main className="h-full overflow-y-auto">
+            <div className="container mx-auto flex flex-row items-center">
+              <h1 className="text-3xl font-bold">Accounts</h1>
+
+              <Link href="/accounts/create" passHref>
+                <a className="border border-indigo-500 bg-indigo-500 text-white rounded-full px-4 py-2 m-2 transition duration-500 ease select-none hover:bg-indigo-600 focus:outline-none focus:shadow-outline text-xs">
+                  Add
+                </a>
+              </Link>
+            </div>
+          </main>
+        </div>
 
         {isLoading ? (
           <p>Loading...</p>
@@ -95,6 +109,11 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const session = await getSession(context);
+
+  if (!session && context.req) {
+    context.res.writeHead(302, { Location: NEXT_PUBLIC_BASE_URL }).end();
+    return { props: {} };
+  }
 
   return {
     props: {
