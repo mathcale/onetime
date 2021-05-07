@@ -4,8 +4,6 @@ import { Provider } from 'next-auth/client';
 import { ChakraProvider } from '@chakra-ui/react';
 
 import 'notyf/notyf.min.css';
-
-import 'notyf/notyf.min.css';
 import '../assets/css/styles.css';
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
