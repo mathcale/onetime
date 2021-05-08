@@ -49,11 +49,14 @@ const CreateAccountPage = ({ session }: CreateAccountPageProps): JSX.Element => 
       router.push('/accounts');
     } catch (err) {
       notyf.error({
-        message: 'There was a problem while saving this account. Please try again later!',
+        message:
+          err.name === 'SaveAccountError'
+            ? err.message
+            : 'There was a problem while saving this account. Please try again later!',
         duration: 4000,
       });
 
-      console.error(err.message);
+      console.error(err);
     } finally {
       setIsLoading(false);
     }

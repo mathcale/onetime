@@ -1,6 +1,7 @@
 import { Session } from 'next-auth';
 import { authenticator } from 'otplib';
 
+import SaveAccountError from '../errors/SaveAccountError';
 import type { Account } from '../types';
 
 export const AccountService = {
@@ -26,6 +27,11 @@ export const AccountService = {
         secret,
       }),
     });
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      throw new SaveAccountError(errorResponse.code, errorResponse.message);
+    }
 
     const data = await response.json();
 

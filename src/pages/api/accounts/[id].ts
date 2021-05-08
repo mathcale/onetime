@@ -46,6 +46,17 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void |
       return;
     }
 
+    const accountExists = await db.collection('keys').findOne({ userId: id, secret: body.secret });
+
+    if (accountExists) {
+      res.status(409).json({
+        message: 'This secret is already linked to an account!',
+        code: 'DUPLICATED_SECRET',
+      });
+
+      return;
+    }
+
     const newAccount = {
       userId: id,
       account: body.account,
