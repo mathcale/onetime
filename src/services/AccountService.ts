@@ -1,5 +1,5 @@
-import { Session } from 'next-auth/client';
-import { authenticator } from '@otplib/preset-v11';
+import { Session } from 'next-auth';
+import { authenticator } from 'otplib';
 
 import type { Account } from '../types';
 

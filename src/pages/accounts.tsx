@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
-import { getSession, Session } from 'next-auth/client';
-import { authenticator } from '@otplib/preset-v11';
+import { getSession } from 'next-auth/client';
+import { authenticator } from 'otplib';
+import type { Session } from 'next-auth';
 
 import { Navbar, AccountCard } from '../components';
 import { AccountService } from '../services';
-import { Account } from '../types';
+import { useInterval } from '../hooks';
+import type { Account } from '../types';
 
 interface AccountsPageProps {
   session: Session;
@@ -16,7 +18,7 @@ const { NEXT_PUBLIC_BASE_URL } = process.env;
 
 const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function getAccounts() {
@@ -38,26 +40,18 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
     getAccounts();
   }, []);
 
-  useEffect(() => {
-    if (accounts.length === 0) {
-      return;
-    }
+  useInterval(() => {
+    const updatedAccounts = accounts.map(account => {
+      return !AccountService.isTokenValid(account.token, account.secret)
+        ? {
+            ...account,
+            token: authenticator.generate(account.secret),
+          }
+        : account;
+    });
 
-    const interval = setInterval(() => {
-      const updatedAccounts = accounts.map(account => {
-        return !AccountService.isTokenValid(account.token, account.secret)
-          ? {
-              ...account,
-              token: authenticator.generate(account.secret),
-            }
-          : account;
-      });
-
-      setAccounts(updatedAccounts);
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
+    setAccounts(updatedAccounts);
+  }, 2000);
 
   if (!session && typeof window !== 'undefined') {
     window.location.href = NEXT_PUBLIC_BASE_URL;
