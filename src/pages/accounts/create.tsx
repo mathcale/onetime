@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { GetServerSideProps } from 'next';
-import Link from 'next/link';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { getSession, Session } from 'next-auth/client';
+import { getSession } from 'next-auth/client';
+import { Container, Stack, Text, Button, FormControl, FormLabel, Input } from '@chakra-ui/react';
+import { ArrowBackIcon } from '@chakra-ui/icons';
+import type { Session } from 'next-auth';
 
+import { Navbar } from '../../components';
 import { AccountService } from '../../services';
+import NotyfContext from '../../context/NotyfContext';
 
 interface CreateAccountPageProps {
   session: Session;
@@ -15,12 +20,18 @@ const CreateAccountPage = ({ session }: CreateAccountPageProps): JSX.Element => 
   const [secret, setSecret] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const notyf = useContext(NotyfContext);
   const router = useRouter();
 
   const saveAccount = async (e: React.MouseEvent): Promise<void | boolean> => {
     e.preventDefault();
 
     if (account === '' || secret === '') {
+      notyf.error({
+        message: 'All fields are required!',
+        duration: 3000,
+      });
+
       return false;
     }
 
@@ -29,43 +40,79 @@ const CreateAccountPage = ({ session }: CreateAccountPageProps): JSX.Element => 
     try {
       //@ts-ignore
       await AccountService.saveAccount(session.user.id, account, secret);
+
+      notyf.success({
+        message: 'Account successfully saved!',
+        duration: 3000,
+      });
+
       router.push('/accounts');
     } catch (err) {
-      console.error(err);
+      notyf.error({
+        message: 'There was a problem while saving this account. Please try again later!',
+        duration: 4000,
+      });
+
+      console.error(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div>
-      <h1>Add new account</h1>
-      <Link href="/accounts">Go back</Link>
+    <>
+      <Head>
+        <title>Add new account - Onetime: 2FA Keys Manager</title>
+      </Head>
 
-      <div>
-        <form>
-          <input
-            type="text"
-            onChange={e => setAccount(e.target.value)}
-            placeholder="Account name"
+      <Navbar />
+
+      <Container maxW="container.xl">
+        <Stack direction="row" align="center" my="5">
+          <Text fontSize="4xl" fontWeight="bold" mr="2">
+            Add new account
+          </Text>
+
+          <Button onClick={() => router.push('/accounts')} size="sm" fontSize="sm" rounded="full">
+            <ArrowBackIcon mr="2" /> Go back
+          </Button>
+        </Stack>
+
+        <Stack spacing={5}>
+          <FormControl id="accountName">
+            <FormLabel>Account name</FormLabel>
+
+            <Input
+              type="text"
+              onChange={e => setAccount(e.target.value)}
+              disabled={isLoading}
+              required
+            />
+          </FormControl>
+
+          <FormControl id="secret">
+            <FormLabel>Secret</FormLabel>
+
+            <Input
+              type="text"
+              onChange={e => setSecret(e.target.value)}
+              disabled={isLoading}
+              required
+            />
+          </FormControl>
+
+          <Button
+            bg="blue.400"
+            color="white"
+            _hover={{ bg: 'blue.500' }}
+            onClick={saveAccount}
             disabled={isLoading}
-            required
-          />
-
-          <input
-            type="text"
-            onChange={e => setSecret(e.target.value)}
-            placeholder="Secret"
-            disabled={isLoading}
-            required
-          />
-
-          <button type="button" onClick={saveAccount} disabled={isLoading}>
-            Create
-          </button>
-        </form>
-      </div>
-    </div>
+          >
+            Save
+          </Button>
+        </Stack>
+      </Container>
+    </>
   );
 };
 
