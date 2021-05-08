@@ -5,7 +5,6 @@ import {
   Flex,
   Avatar,
   HStack,
-  Button,
   Menu,
   MenuButton,
   MenuList,
