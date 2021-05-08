@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { getSession } from 'next-auth/client';
-import { authenticator } from 'otplib';
 import type { Session } from 'next-auth';
 
 import { Navbar, AccountCard } from '../components';
@@ -26,7 +25,7 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
         const dbAccounts = await AccountService.getAccounts(session);
         const _accounts = dbAccounts.map(account => ({
           ...account,
-          token: authenticator.generate(account.secret),
+          token: AccountService.generateToken(account.secret),
         }));
 
         setAccounts(_accounts);
@@ -45,7 +44,7 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
       return !AccountService.isTokenValid(account.token, account.secret)
         ? {
             ...account,
-            token: authenticator.generate(account.secret),
+            token: AccountService.generateToken(account.secret),
           }
         : account;
     });

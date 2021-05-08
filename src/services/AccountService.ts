@@ -31,6 +31,9 @@ export const AccountService = {
 
     return data;
   },
+  generateToken: (secret: string): string => {
+    return authenticator.generate(secret);
+  },
   isTokenValid: (token: string, secret: string): boolean => {
     return authenticator.check(token, secret);
   },
