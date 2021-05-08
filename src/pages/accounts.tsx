@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
-import Link from 'next/link';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/client';
+import { Container, SimpleGrid, Stack, Center, Text, Button } from '@chakra-ui/react';
+import { AddIcon } from '@chakra-ui/icons';
 import type { Session } from 'next-auth';
 
-import { Navbar, AccountCard } from '../components';
+import { Navbar, AccountCard, Loading } from '../components';
 import { AccountService } from '../services';
 import { useInterval } from '../hooks';
 import type { Account } from '../types';
@@ -16,6 +19,8 @@ interface AccountsPageProps {
 const { NEXT_PUBLIC_BASE_URL } = process.env;
 
 const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
+  const router = useRouter();
+
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -59,43 +64,38 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
 
   return (
     <>
+      <Head>
+        <title>Accounts - Onetime: 2FA Keys Manager</title>
+      </Head>
+
       <Navbar />
 
-      <div className="p-5">
-        <div className="py-5">
-          <main className="h-full overflow-y-auto">
-            <div className="container mx-auto flex flex-row items-center">
-              <h1 className="text-3xl font-bold">Accounts</h1>
+      <Container maxW="container.xl">
+        <Stack direction="row" align="center" my="5">
+          <Text fontSize="4xl" fontWeight="bold" mr="2">
+            Accounts
+          </Text>
 
-              <Link href="/accounts/create" passHref>
-                <a className="border border-indigo-500 bg-indigo-500 text-white rounded-full px-4 py-2 m-2 transition duration-500 ease select-none hover:bg-indigo-600 focus:outline-none focus:shadow-outline text-xs">
-                  Add
-                </a>
-              </Link>
-            </div>
-          </main>
-        </div>
+          <Button
+            onClick={() => router.push('/accounts/create')}
+            size="sm"
+            fontSize="sm"
+            rounded="full"
+          >
+            <AddIcon mr="2" /> Add
+          </Button>
+        </Stack>
 
         {isLoading ? (
-          <p>Loading...</p>
+          <Loading />
         ) : (
-          <div className="py-5">
-            <main className="h-full overflow-y-auto">
-              <div className="container mx-auto grid">
-                <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-5">
-                  {accounts.map(account => (
-                    <AccountCard
-                      key={account._id}
-                      accountName={account.account}
-                      token={account.token}
-                    />
-                  ))}
-                </div>
-              </div>
-            </main>
-          </div>
+          <SimpleGrid columns={{ base: 1, md: 3, lg: 4 }} spacing={{ base: 5, lg: 8 }} mb="10">
+            {accounts.map(account => (
+              <AccountCard key={account._id} accountName={account.account} token={account.token} />
+            ))}
+          </SimpleGrid>
         )}
-      </div>
+      </Container>
     </>
   );
 };
