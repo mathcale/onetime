@@ -3,7 +3,7 @@ import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/client';
-import { Container, SimpleGrid, Stack, Center, Text, Button } from '@chakra-ui/react';
+import { Container, SimpleGrid, Stack, Text, Button } from '@chakra-ui/react';
 import { AddIcon } from '@chakra-ui/icons';
 import type { Session } from 'next-auth';
 
@@ -24,23 +24,23 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    async function getAccounts() {
-      try {
-        const dbAccounts = await AccountService.getAccounts(session);
-        const _accounts = dbAccounts.map(account => ({
-          ...account,
-          token: AccountService.generateToken(account.secret),
-        }));
+  const getAccounts = async (): Promise<void | never> => {
+    try {
+      const dbAccounts = await AccountService.getAccounts(session);
+      const _accounts = dbAccounts.map(account => ({
+        ...account,
+        token: AccountService.generateToken(account.secret),
+      }));
 
-        setAccounts(_accounts);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
+      setAccounts(_accounts);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
+  useEffect(() => {
     getAccounts();
   }, []);
 
@@ -61,6 +61,24 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
     window.location.href = NEXT_PUBLIC_BASE_URL;
     return null;
   }
+
+  const onDeleteAccountClick = async (account: Account): Promise<void | never> => {
+    const canDelete = confirm(`Are you sure you want to delete "${account.account}"?`);
+
+    if (!canDelete) return;
+
+    setIsLoading(true);
+
+    try {
+      // @ts-ignore
+      await AccountService.deleteAccount(session.user.id, account._id);
+      await getAccounts();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -91,7 +109,12 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
         ) : (
           <SimpleGrid columns={{ base: 1, md: 3, lg: 4 }} spacing={{ base: 5, lg: 8 }} mb="10">
             {accounts.map(account => (
-              <AccountCard key={account._id} accountName={account.account} token={account.token} />
+              <AccountCard
+                key={account._id}
+                accountName={account.account}
+                token={account.token}
+                onDeleteClick={() => onDeleteAccountClick(account)}
+              />
             ))}
           </SimpleGrid>
         )}

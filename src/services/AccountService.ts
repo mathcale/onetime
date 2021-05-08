@@ -7,8 +7,12 @@ import type { Account } from '../types';
 export const AccountService = {
   getAccounts: async (session: Session): Promise<Account[]> => {
     // @ts-ignore
-    const response = await fetch(`/api/accounts/${session.user.id}`);
+    const response = await fetch(`/api/users/${session.user.id}/accounts`);
     const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
 
     return data;
   },
@@ -17,7 +21,7 @@ export const AccountService = {
     account: string,
     secret: string
   ): Promise<Account | never> => {
-    const response = await fetch(`/api/accounts/${userId}`, {
+    const response = await fetch(`/api/users/${userId}/accounts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,6 +40,19 @@ export const AccountService = {
     const data = await response.json();
 
     return data;
+  },
+  deleteAccount: async (userId: string, accountId: string): Promise<void | never> => {
+    const response = await fetch(`/api/users/${userId}/accounts/${accountId}`, {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      throw new Error(errorResponse.message);
+    }
   },
   generateToken: (secret: string): string => {
     return authenticator.generate(secret);

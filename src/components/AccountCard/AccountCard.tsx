@@ -7,9 +7,14 @@ import NotyfContext from '../../context/NotyfContext';
 interface AccountCardProps {
   accountName: string;
   token: string;
+  onDeleteClick: () => void;
 }
 
-export const AccountCard = ({ accountName, token }: AccountCardProps): JSX.Element => {
+export const AccountCard = ({
+  accountName,
+  token,
+  onDeleteClick,
+}: AccountCardProps): JSX.Element => {
   const notyf = useContext(NotyfContext);
 
   const copy = async (token: string): Promise<void> => {
@@ -41,6 +46,7 @@ export const AccountCard = ({ accountName, token }: AccountCardProps): JSX.Eleme
         </Button>
 
         <Button
+          onClick={onDeleteClick}
           flex={1}
           fontSize="md"
           rounded="full"

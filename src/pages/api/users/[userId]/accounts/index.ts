@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/client';
 
-import type { CreateAccountRequest, Account } from '../../../types';
-import { connectToDatabase } from '../../../utils/mongodb';
+import type { CreateAccountRequest, Account } from '../../../../../types';
+import { connectToDatabase } from '../../../../../utils/mongodb';
 
 const isRequestBodyValid = (body: CreateAccountRequest): boolean => {
   if (body?.account === '') {
@@ -24,18 +24,19 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void |
   }
 
   const {
-    query: { id },
+    query: { userId },
   } = req;
 
   // @ts-ignore
-  if (session.user.id !== id) {
+  if (session.user.id !== userId) {
     res.status(401).json({ message: 'Unauthorized!' });
+    return;
   }
 
   const { db } = await connectToDatabase();
 
   if (req.method === 'GET') {
-    const accounts = await db.collection('keys').find({ userId: id }).toArray();
+    const accounts = await db.collection('keys').find({ userId }).toArray();
 
     res.status(200).json(accounts);
   } else if (req.method === 'POST') {
@@ -46,7 +47,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void |
       return;
     }
 
-    const accountExists = await db.collection('keys').findOne({ userId: id, secret: body.secret });
+    const accountExists = await db.collection('keys').findOne({ userId, secret: body.secret });
 
     if (accountExists) {
       res.status(409).json({
@@ -58,7 +59,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void |
     }
 
     const newAccount = {
-      userId: id,
+      userId,
       account: body.account,
       secret: body.secret,
       createdAt: new Date().toISOString(),
@@ -68,5 +69,8 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void |
     const result = await db.collection('keys').insertOne(newAccount);
 
     res.status(201).json(result.ops[0]);
+  } else {
+    res.status(405).json({ message: 'Method not allowed' });
+    return;
   }
 };
