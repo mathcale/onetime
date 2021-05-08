@@ -13,6 +13,7 @@ import {
   MenuDivider,
   Text,
   useColorModeValue,
+  IconButton,
 } from '@chakra-ui/react';
 
 export const Navbar = (): JSX.Element => {
@@ -41,7 +42,7 @@ export const Navbar = (): JSX.Element => {
 
         <Flex alignItems="center">
           <Menu>
-            <MenuButton as={Button} rounded="full" variant="link" cursor="pointer">
+            <MenuButton as={IconButton} variant="none" rounded="full">
               <Avatar size="sm" src={imageUrl} />
             </MenuButton>
 
