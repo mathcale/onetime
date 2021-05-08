@@ -1,9 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/client';
-import { Container, SimpleGrid, Stack, Text, Button } from '@chakra-ui/react';
+import {
+  Container,
+  SimpleGrid,
+  Stack,
+  Text,
+  Button,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogCloseButton,
+  AlertDialogBody,
+  AlertDialogFooter,
+  useDisclosure,
+} from '@chakra-ui/react';
 import { AddIcon } from '@chakra-ui/icons';
 import type { Session } from 'next-auth';
 
@@ -22,7 +36,11 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
   const router = useRouter();
 
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = useRef();
 
   const getAccounts = async (): Promise<void | never> => {
     try {
@@ -63,11 +81,8 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
   }
 
   const onDeleteAccountClick = async (account: Account): Promise<void | never> => {
-    const canDelete = confirm(`Are you sure you want to delete "${account.account}"?`);
-
-    if (!canDelete) return;
-
     setIsLoading(true);
+    onClose();
 
     try {
       // @ts-ignore
@@ -113,12 +128,45 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
                 key={account._id}
                 accountName={account.account}
                 token={account.token}
-                onDeleteClick={() => onDeleteAccountClick(account)}
+                onDeleteClick={() => {
+                  setSelectedAccount(account);
+                  onOpen();
+                }}
               />
             ))}
           </SimpleGrid>
         )}
       </Container>
+
+      <AlertDialog
+        motionPreset="slideInBottom"
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+        isOpen={isOpen}
+        closeOnOverlayClick={false}
+        isCentered
+      >
+        <AlertDialogOverlay />
+
+        <AlertDialogContent>
+          <AlertDialogHeader>Delete account?</AlertDialogHeader>
+          <AlertDialogCloseButton />
+
+          <AlertDialogBody>
+            Are you sure you want to delete <strong>"{selectedAccount?.account}"</strong>?
+          </AlertDialogBody>
+
+          <AlertDialogFooter>
+            <Button ref={cancelRef} onClick={onClose}>
+              No
+            </Button>
+
+            <Button colorScheme="red" ml={3} onClick={() => onDeleteAccountClick(selectedAccount)}>
+              Yes
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
