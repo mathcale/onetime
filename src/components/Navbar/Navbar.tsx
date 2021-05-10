@@ -13,12 +13,23 @@ import {
   Text,
   useColorModeValue,
   IconButton,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  InputRightElement,
 } from '@chakra-ui/react';
+import { SearchIcon, SmallCloseIcon } from '@chakra-ui/icons';
+
+import { useStore } from '../../store';
 
 export const Navbar = (): JSX.Element => {
+  const accounts = useStore(state => state.accounts);
+  const setFilteredAccounts = useStore(state => state.setFilteredAccounts);
+
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
     async function getUserData() {
@@ -32,11 +43,46 @@ export const Navbar = (): JSX.Element => {
     getUserData();
   }, []);
 
+  useEffect(() => {
+    if (searchTerm !== '') {
+      const searchResult = accounts.filter(account =>
+        account.account.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      setFilteredAccounts(searchResult);
+    } else {
+      setFilteredAccounts([]);
+    }
+  }, [searchTerm]);
+
   return (
     <Box bg={useColorModeValue('gray.100', 'gray.900')} px={4}>
       <Flex h={16} alignItems="center" justifyContent="space-between">
         <HStack spacing={8} alignItems="center">
           <Box>Onetime</Box>
+        </HStack>
+
+        <HStack>
+          <InputGroup>
+            <InputLeftElement pointerEvents="none" children={<SearchIcon color="gray.300" />} />
+
+            <Input
+              type="text"
+              placeholder="Search account"
+              size="md"
+              w={{ sm: '300px', xl: '320px' }}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+
+            {searchTerm !== '' && (
+              <InputRightElement
+                onClick={() => setSearchTerm('')}
+                children={<SmallCloseIcon color="gray.300" />}
+                cursor="pointer"
+              />
+            )}
+          </InputGroup>
         </HStack>
 
         <Flex alignItems="center">

@@ -35,7 +35,9 @@ const { NEXT_PUBLIC_BASE_URL } = process.env;
 
 const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
   const router = useRouter();
+
   const accounts = useStore(state => state.accounts);
+  const filteredAccounts = useStore(state => state.filteredAccounts);
   const setAccounts = useStore(state => state.setAccounts);
 
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
@@ -91,6 +93,18 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
     }
   };
 
+  const renderAccountCard = (account: Account): JSX.Element => (
+    <AccountCard
+      key={account._id}
+      accountName={account.account}
+      token={account.token}
+      onDeleteClick={() => {
+        setSelectedAccount(account);
+        onOpen();
+      }}
+    />
+  );
+
   return (
     <>
       <Head>
@@ -119,17 +133,9 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
           <Loading />
         ) : (
           <SimpleGrid columns={{ base: 1, md: 3, lg: 4 }} spacing={{ base: 5, lg: 8 }} mb="10">
-            {accounts.map(account => (
-              <AccountCard
-                key={account._id}
-                accountName={account.account}
-                token={account.token}
-                onDeleteClick={() => {
-                  setSelectedAccount(account);
-                  onOpen();
-                }}
-              />
-            ))}
+            {filteredAccounts.length > 0
+              ? filteredAccounts.map(account => renderAccountCard(account))
+              : accounts.map(account => renderAccountCard(account))}
           </SimpleGrid>
         )}
       </Container>
