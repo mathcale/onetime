@@ -6,7 +6,6 @@ import { ChakraProvider } from '@chakra-ui/react';
 import theme from '../utils/theme';
 
 import 'notyf/notyf.min.css';
-import '../assets/css/styles.css';
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
   return (
