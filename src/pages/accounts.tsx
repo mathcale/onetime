@@ -24,6 +24,7 @@ import type { Session } from 'next-auth';
 import { Navbar, AccountCard, Loading } from '../components';
 import { AccountService } from '../services';
 import { useInterval } from '../hooks';
+import { useStore } from '../store';
 import type { Account } from '../types';
 
 interface AccountsPageProps {
@@ -34,8 +35,9 @@ const { NEXT_PUBLIC_BASE_URL } = process.env;
 
 const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
   const router = useRouter();
+  const accounts = useStore(state => state.accounts);
+  const setAccounts = useStore(state => state.setAccounts);
 
-  const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -44,13 +46,7 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
 
   const getAccounts = async (): Promise<void | never> => {
     try {
-      const dbAccounts = await AccountService.getAccounts(session);
-      const _accounts = dbAccounts.map(account => ({
-        ...account,
-        token: AccountService.generateToken(account.secret),
-      }));
-
-      setAccounts(_accounts);
+      await AccountService.getAccounts(session);
     } catch (err) {
       console.error(err);
     } finally {

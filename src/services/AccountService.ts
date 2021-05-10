@@ -1,11 +1,14 @@
 import { Session } from 'next-auth';
 import { authenticator } from 'otplib';
 
+import { useStore } from '../store';
 import SaveAccountError from '../errors/SaveAccountError';
 import type { Account } from '../types';
 
+const { setAccounts } = useStore.getState();
+
 export const AccountService = {
-  getAccounts: async (session: Session): Promise<Account[]> => {
+  async getAccounts(session: Session): Promise<void | never> {
     // @ts-ignore
     const response = await fetch(`/api/users/${session.user.id}/accounts`);
     const data = await response.json();
@@ -14,7 +17,12 @@ export const AccountService = {
       throw new Error(data.message);
     }
 
-    return data;
+    const _accounts = data.map((account: Account) => ({
+      ...account,
+      token: this.generateToken(account.secret),
+    }));
+
+    setAccounts(_accounts);
   },
   saveAccount: async (
     userId: string,
