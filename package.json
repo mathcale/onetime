@@ -9,7 +9,7 @@
     "url": "https://matheus.me"
   },
   "engines": {
-    "node": ">=16.13.0"
+    "node": ">=14"
   },
   "scripts": {
     "dev": "next dev",
