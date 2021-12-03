@@ -17,6 +17,9 @@ import {
   InputGroup,
   InputLeftElement,
   InputRightElement,
+  useMediaQuery,
+  Button,
+  Collapse,
 } from '@chakra-ui/react';
 import { SearchIcon, SmallCloseIcon } from '@chakra-ui/icons';
 
@@ -30,6 +33,9 @@ export const Navbar = (): JSX.Element => {
   const [email, setEmail] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
+
+  const [isMobile] = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {
     async function getUserData() {
@@ -55,6 +61,30 @@ export const Navbar = (): JSX.Element => {
     }
   }, [searchTerm]);
 
+  const renderSearch = (): JSX.Element => (
+    <HStack>
+      <InputGroup>
+        <InputLeftElement pointerEvents="none" children={<SearchIcon color="gray.300" />} />
+
+        <Input
+          type="text"
+          placeholder="Search account"
+          size="md"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
+
+        {searchTerm !== '' && (
+          <InputRightElement
+            onClick={() => setSearchTerm('')}
+            children={<SmallCloseIcon color="gray.300" />}
+            cursor="pointer"
+          />
+        )}
+      </InputGroup>
+    </HStack>
+  );
+
   return (
     <Box bg={useColorModeValue('gray.100', 'gray.900')} px={4}>
       <Flex h={16} alignItems="center" justifyContent="space-between">
@@ -62,55 +92,52 @@ export const Navbar = (): JSX.Element => {
           <Box>Onetime</Box>
         </HStack>
 
-        <HStack>
-          <InputGroup>
-            <InputLeftElement pointerEvents="none" children={<SearchIcon color="gray.300" />} />
+        {!isMobile && renderSearch()}
 
-            <Input
-              type="text"
-              placeholder="Search account"
-              size="md"
-              w={{ sm: '300px', xl: '320px' }}
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
+        <Flex alignItems="flex-end">
+          {isMobile && (
+            <Button
+              bgColor="transparent"
+              mr="1"
+              onClick={() => setIsSearchVisible(current => !current)}
+            >
+              <SearchIcon color="gray.300" />
+            </Button>
+          )}
 
-            {searchTerm !== '' && (
-              <InputRightElement
-                onClick={() => setSearchTerm('')}
-                children={<SmallCloseIcon color="gray.300" />}
-                cursor="pointer"
-              />
-            )}
-          </InputGroup>
-        </HStack>
+          <Flex alignItems="center">
+            <Menu>
+              <MenuButton as={IconButton} variant="none" rounded="full">
+                <Avatar size="sm" src={imageUrl} />
+              </MenuButton>
 
-        <Flex alignItems="center">
-          <Menu>
-            <MenuButton as={IconButton} variant="none" rounded="full">
-              <Avatar size="sm" src={imageUrl} />
-            </MenuButton>
+              <MenuList>
+                <MenuItem as="div" style={{ display: 'block' }}>
+                  <Text fontSize="sm">{name}</Text>
+                  <Text fontSize="xs" color="gray.500">
+                    {email}
+                  </Text>
+                </MenuItem>
 
-            <MenuList>
-              <MenuItem as="div" style={{ display: 'block' }}>
-                <Text fontSize="sm">{name}</Text>
-                <Text fontSize="xs" color="gray.500">
-                  {email}
-                </Text>
-              </MenuItem>
+                <MenuDivider />
 
-              <MenuDivider />
-
-              <MenuItem
-                fontSize="sm"
-                onClick={() => signOut({ callbackUrl: process.env.NEXT_PUBLIC_BASE_URL })}
-              >
-                Sign out
-              </MenuItem>
-            </MenuList>
-          </Menu>
+                <MenuItem
+                  fontSize="sm"
+                  onClick={() => signOut({ callbackUrl: process.env.NEXT_PUBLIC_BASE_URL })}
+                >
+                  Sign out
+                </MenuItem>
+              </MenuList>
+            </Menu>
+          </Flex>
         </Flex>
       </Flex>
+
+      {isMobile && (
+        <Collapse in={isSearchVisible} animateOpacity>
+          <Box pb="6">{renderSearch()}</Box>
+        </Collapse>
+      )}
     </Box>
   );
 };
