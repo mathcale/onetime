@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, MongoClientOptions, ServerApiVersion } from 'mongodb';
 
 const { DATABASE_URL, DATABASE_NAME } = process.env;
 
@@ -26,12 +26,15 @@ export async function connectToDatabase(): Promise<any> {
   if (!cached.promise) {
     const conn = {};
 
-    const opts = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    const options: MongoClientOptions = {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      },
     };
 
-    cached.promise = MongoClient.connect(DATABASE_URL, opts)
+    cached.promise = MongoClient.connect(DATABASE_URL, options)
       .then(client => {
         // @ts-ignore
         conn.client = client;
