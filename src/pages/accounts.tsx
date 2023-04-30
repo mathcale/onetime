@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { getSession } from 'next-auth/client';
+import { getSession } from 'next-auth/react';
 import {
   Container,
   SimpleGrid,

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/client';
+import { getSession } from 'next-auth/react';
 import { ObjectId } from 'mongodb';
 
 import { connectToDatabase } from '../../../../../utils/mongodb';
@@ -27,7 +27,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void |
 
     res.status(200).json(accounts);
   } else if (req.method === 'DELETE') {
-    const account = await db.collection('keys').findOne({ _id: ObjectId(accountId) });
+    const account = await db.collection('keys').findOne({ _id: new ObjectId(accountId as string) });
 
     if (!account) {
       res.status(404).json({
@@ -38,7 +38,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void |
       return;
     }
 
-    await db.collection('keys').deleteOne({ _id: ObjectId(accountId) });
+    await db.collection('keys').deleteOne({ _id: new ObjectId(accountId as string) });
 
     res.status(200).json({ message: 'Account successfully deleted!' });
   }
