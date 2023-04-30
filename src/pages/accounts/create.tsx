@@ -2,7 +2,7 @@ import { useState, useContext } from 'react';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { getSession } from 'next-auth/client';
+import { getSession } from 'next-auth/react';
 import { Container, Stack, Text, Button, FormControl, FormLabel, Input } from '@chakra-ui/react';
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import type { Session } from 'next-auth';

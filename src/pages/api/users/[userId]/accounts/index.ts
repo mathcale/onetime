@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/client';
+import { getSession } from 'next-auth/react';
 
 import type { CreateAccountRequest, Account } from '../../../../../types';
 import { connectToDatabase } from '../../../../../utils/mongodb';

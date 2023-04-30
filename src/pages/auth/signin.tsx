@@ -1,5 +1,5 @@
 import React from 'react';
-import { signIn } from 'next-auth/client';
+import { signIn } from 'next-auth/react';
 
 const SignInPage = (): JSX.Element => {
   const handleLogin = e => {

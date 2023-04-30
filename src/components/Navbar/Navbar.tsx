@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getSession, signOut } from 'next-auth/client';
+import { getSession, signOut } from 'next-auth/react';
 import {
   Box,
   Flex,

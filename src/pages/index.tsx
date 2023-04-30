@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { signIn, getSession } from 'next-auth/client';
+import { signIn, getSession } from 'next-auth/react';
 import { Box, Heading, Container, Text, Button, Stack } from '@chakra-ui/react';
 import { GetServerSideProps } from 'next';
 
