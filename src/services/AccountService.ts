@@ -68,4 +68,7 @@ export const AccountService = {
   isTokenValid: (token: string, secret: string): boolean => {
     return authenticator.check(token, secret);
   },
+  getTimeRemaining: (): number => {
+    return authenticator.timeRemaining();
+  },
 };

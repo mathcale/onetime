@@ -4,27 +4,32 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogCloseButton,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  Button,
+  CircularProgress,
+  CircularProgressLabel,
   Container,
+  Flex,
   SimpleGrid,
+  Spacer,
   Stack,
   Text,
-  Button,
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogCloseButton,
-  AlertDialogBody,
-  AlertDialogFooter,
   useDisclosure,
 } from '@chakra-ui/react';
 import { AddIcon } from '@chakra-ui/icons';
-import type { Session } from 'next-auth';
 
 import { Navbar, AccountCard, Loading } from '../components';
 import { AccountService } from '../services';
 import { useInterval } from '../hooks';
 import { useStore } from '../store';
+
+import type { Session } from 'next-auth';
 import type { Account } from '../types';
 
 interface AccountsPageProps {
@@ -41,6 +46,7 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
   const setAccounts = useStore(state => state.setAccounts);
 
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number>(AccountService.getTimeRemaining());
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -58,6 +64,16 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
 
   useEffect(() => {
     getAccounts();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeRemaining(AccountService.getTimeRemaining());
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   useInterval(() => {
@@ -114,20 +130,30 @@ const AccountsPage = ({ session }: AccountsPageProps): JSX.Element => {
       <Navbar />
 
       <Container maxW="container.xl">
-        <Stack direction="row" align="center" my="5">
-          <Text fontSize="4xl" fontWeight="bold" mr="2">
-            Accounts
-          </Text>
+        <Flex>
+          <Stack direction="row" align="center" my="5">
+            <Text fontSize="4xl" fontWeight="bold" mr="2">
+              Accounts
+            </Text>
 
-          <Button
-            onClick={() => router.push('/accounts/create')}
-            size="sm"
-            fontSize="sm"
-            rounded="full"
-          >
-            <AddIcon mr="2" /> Add
-          </Button>
-        </Stack>
+            <Button
+              onClick={() => router.push('/accounts/create')}
+              size="sm"
+              fontSize="sm"
+              rounded="full"
+            >
+              <AddIcon mr="2" /> Add
+            </Button>
+          </Stack>
+
+          <Spacer />
+
+          <Stack direction="row" align="center" my="5">
+            <CircularProgress value={(timeRemaining / 30) * 100} color="blue.700">
+              <CircularProgressLabel>{timeRemaining}s</CircularProgressLabel>
+            </CircularProgress>
+          </Stack>
+        </Flex>
 
         {isLoading ? (
           <Loading />
